@@ -56,12 +56,47 @@ def change_dir(command):
             
             path += current_directory[x]
         print(path)
+#No redirect just a simple command
+def cmd_1(cmd):
+    print("HELLO")
+    rc = os.fork()
+    
+    if rc < 0:
+        os.write(2,("Fork failed, returning %d\n" %rc).encode())
+        sys.exit(1)
+    elif rc ==0:
+        args = cmd
+        for dir in re.split(":", os.environ['PATH']):
+            program = "%s/%s" % (dir, args[0])
+            os.write(1, ("Child: ... Trying to exec %s\n" %program).encode())
+            try:
+                os.execve(program, args, os.environ)
+            except FileNotFoundError:
+                pass
+        os.write(2,("Child: Could not exec %s\n" %args[0]).encode())
+        sys.exit(1)
+
+    
+while(True):
+    try:
+        prompt = input("$ ")
+    except EOFError:
+        print("\n")
+        exit()
+    cmd_arr = prompt.split()
+    print(f"You entered:{cmd_arr}, {len(cmd_arr)}")
+    if len(cmd_arr)==1:
+        if cmd_arr[0] == "exit":
+            exit()
+    print("Entering cmd_1")
+    cmd_1(cmd_arr)
+    os.wait()
+    print("Hi")
+    
+        
 
 
-
-
-
-
+"""
 while(True):
     command = input("$ ")
     cmd_array = command.split()
@@ -79,3 +114,4 @@ while(True):
         change_dir(command)
     elif(cmd_type != "") : # python file run with args
         cmd(command)
+"""
