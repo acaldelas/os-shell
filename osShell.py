@@ -10,7 +10,7 @@ import os, sys, time, re
 pid = os.getpid()
 
 os.write(1,("about to fork(pid=%d)\n" % pid).encode())
-def cmd_redirect(user_input,):
+def cmd_redirect(user_input,user_re, user_out):
     rc = os.fork()
 
     if(rc<0):
@@ -18,6 +18,7 @@ def cmd_redirect(user_input,):
         sys.exit(1)
     elif(rc ==0):
         spl = user_input.split()
+        print(spl)
         args = [spl]
 
         os.close(1)
