@@ -56,6 +56,26 @@ def change_dir(command):
             
             path += current_directory[x]
         print(path)
+def cmd_2(cmd):
+    print("Hello we gotta do some redirecting here...")
+    rc = os.fork()
+    if rc < 0:
+        os.write(2,("Fork failed, returning %d\n" %rc).encode())
+        sys.exit(1)
+    elif rc == 0:
+        args = cmd
+        os.close(1)
+        sys.stdout = open(args[2], "w")
+        os.set_inheritable(1, True)
+        for dir in re.split(":", os.environ['PATH']):
+            program ="%s/%s" % (dir, args[0])
+            try:
+                os.execve(program, args, os.environ)
+            except FileNotFoundError:
+                pass
+        os.write(2, ("Child: Error: could not exec %s\n" % args[0]).encode())
+        sys.exit(1)
+    
 #No redirect just a simple command
 def cmd_1(cmd):
     print("HELLO")
@@ -85,14 +105,23 @@ while(True):
         exit()
     cmd_arr = prompt.split()
     print(f"You entered:{cmd_arr}, {len(cmd_arr)}")
-    if len(cmd_arr)==1:
-        if cmd_arr[0] == "exit":
-            exit()
+    if cmd_arr[0] == "exit":
+        exit()
+    elif '>' in cmd_arr:
+        cmd_2(cmd_arr)
+        os.wait()
+    else:
+        cmd_1(cmd_arr)
+        os.wait()
+    
+    """    
     print("Entering cmd_1")
+    if len(cmd_arr) > 2 and (">") in list:
+        cmd_2(cmd_arr)
+        
     cmd_1(cmd_arr)
     os.wait()
-    print("Hi")
-    
+    print("Hi")"""
         
 
 
